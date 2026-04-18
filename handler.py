@@ -1,84 +1,74 @@
 import PyPDF2
 import pdfplumber
-from config import MAX_PDF_SIZE_MB, ERROR_MESSAGES
+
+try:
+    from .config import ERROR_MESSAGES, MAX_PDF_SIZE_MB
+except ImportError:
+    from config import ERROR_MESSAGES, MAX_PDF_SIZE_MB
+
 
 def extract_text_from_pdf(pdf_file):
     try:
-        if hasattr(pdf_file, 'size'):
+        if hasattr(pdf_file, "size"):
             file_size_mb = pdf_file.size / (1024 * 1024)
             if file_size_mb > MAX_PDF_SIZE_MB:
                 return f"HATA: {ERROR_MESSAGES['pdf_too_large']}"
-        
-        pdf_file.seek(0)  # ← Bunu ekle
-        
-        text = ""
+
+        pdf_file.seek(0)
+        text_parts = []
         with pdfplumber.open(pdf_file) as pdf:
             for page in pdf.pages:
                 extracted = page.extract_text()
                 if extracted:
-                    text += extracted + "\n"
-        
-        return text.strip() if text.strip() else "HATA: PDF'den metin çıkarılamadı"
-    
-    except Exception as e:
-        return f"HATA: PDF işlenirken sorun oluştu - {str(e)}"
+                    text_parts.append(extracted)
+
+        extracted_text = "\n".join(text_parts).strip()
+        return extracted_text if extracted_text else "HATA: PDF'den metin cikarilamadi."
+    except Exception as exc:
+        return f"HATA: PDF islenirken sorun olustu - {exc}"
 
 
-def extract_text_with_pymupdf(pdf_file):
-    """
-    PyPDF2 ile metin çıkarma (alternatif yöntem)
-    
-    Args:
-        pdf_file: PDF dosyası
-    
-    Returns:
-        Çıkarılan metin (str)
-    """
+def extract_text_with_pypdf2(pdf_file):
     try:
+        pdf_file.seek(0)
         pdf_reader = PyPDF2.PdfReader(pdf_file)
-        text = ""
-        
-        for page_num in range(len(pdf_reader.pages)):
-            page = pdf_reader.pages[page_num]
-            text += page.extract_text() + "\n"
-        
-        return text.strip()
-    
-    except Exception as e:
+        text_parts = []
+
+        for page in pdf_reader.pages:
+            extracted = page.extract_text()
+            if extracted:
+                text_parts.append(extracted)
+
+        extracted_text = "\n".join(text_parts).strip()
+        return extracted_text if extracted_text else "HATA: PDF'den metin cikarilamadi."
+    except Exception:
         return f"HATA: {ERROR_MESSAGES['invalid_pdf']}"
 
 
 def split_text_into_chunks(text, chunk_size=2000, overlap=200):
     words = text.split()
+    if not words:
+        return []
+
+    step = max(1, chunk_size - overlap)
     chunks = []
-    step = chunk_size - overlap
-    
-    for i in range(0, len(words), step):
-        chunk = " ".join(words[i:i + chunk_size])
-        if chunk.strip():  # Boş değilse ekle
+    for index in range(0, len(words), step):
+        chunk = " ".join(words[index:index + chunk_size]).strip()
+        if chunk:
             chunks.append(chunk)
-    
     return chunks
 
 
 def get_pdf_info(pdf_file):
-    """
-    PDF dosyasının bilgisini döner (sayfa sayısı, vb)
-    
-    Args:
-        pdf_file: PDF dosyası
-    
-    Returns:
-        Dict: Dosya bilgileri
-    """
     try:
+        pdf_file.seek(0)
         with pdfplumber.open(pdf_file) as pdf:
             return {
                 "page_count": len(pdf.pages),
-                "status": "success"
+                "status": "success",
             }
-    except:
+    except Exception:
         return {
             "page_count": 0,
-            "status": "error"
+            "status": "error",
         }
