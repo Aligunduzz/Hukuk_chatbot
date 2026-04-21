@@ -1,15 +1,11 @@
-# OpenAI API.
+# OpenAI API
 openai==1.30.0
 
-# PDF Processing.
-PyPDF2==4.0.0
+# PDF Processing
 pdfplumber==0.10.20
 
-# Web Interface.
+# Web Interface
 streamlit==1.32.0
 
-# Environment Variables.
+# Environment Variables
 python-dotenv==1.0.0
-
-# Utilities.
-requests==2.31.0

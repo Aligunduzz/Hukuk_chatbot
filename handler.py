@@ -1,5 +1,7 @@
-import PyPDF2
 import pdfplumber
+import logging
+
+logger = logging.getLogger(__name__)
 
 try:
     from .config import ERROR_MESSAGES, MAX_PDF_SIZE_MB
@@ -8,6 +10,7 @@ except ImportError:
 
 
 def extract_text_from_pdf(pdf_file):
+    """PDF dosyasından metin çıkart"""
     try:
         if hasattr(pdf_file, "size"):
             file_size_mb = pdf_file.size / (1024 * 1024)
@@ -16,6 +19,7 @@ def extract_text_from_pdf(pdf_file):
 
         pdf_file.seek(0)
         text_parts = []
+        
         with pdfplumber.open(pdf_file) as pdf:
             for page in pdf.pages:
                 extracted = page.extract_text()
@@ -23,43 +27,20 @@ def extract_text_from_pdf(pdf_file):
                     text_parts.append(extracted)
 
         extracted_text = "\n".join(text_parts).strip()
-        return extracted_text if extracted_text else "HATA: PDF'den metin cikarilamadi."
+        
+        if not extracted_text:
+            logger.warning("PDF'den metin çıkarılamadı")
+            return "HATA: PDF'den metin cikarilamadi."
+        
+        return extracted_text
+        
     except Exception as exc:
+        logger.error(f"PDF işlenirken hata: {exc}")
         return f"HATA: PDF islenirken sorun olustu - {exc}"
 
 
-def extract_text_with_pypdf2(pdf_file):
-    try:
-        pdf_file.seek(0)
-        pdf_reader = PyPDF2.PdfReader(pdf_file)
-        text_parts = []
-
-        for page in pdf_reader.pages:
-            extracted = page.extract_text()
-            if extracted:
-                text_parts.append(extracted)
-
-        extracted_text = "\n".join(text_parts).strip()
-        return extracted_text if extracted_text else "HATA: PDF'den metin cikarilamadi."
-    except Exception:
-        return f"HATA: {ERROR_MESSAGES['invalid_pdf']}"
-
-
-def split_text_into_chunks(text, chunk_size=2000, overlap=200):
-    words = text.split()
-    if not words:
-        return []
-
-    step = max(1, chunk_size - overlap)
-    chunks = []
-    for index in range(0, len(words), step):
-        chunk = " ".join(words[index:index + chunk_size]).strip()
-        if chunk:
-            chunks.append(chunk)
-    return chunks
-
-
 def get_pdf_info(pdf_file):
+    """PDF'nin sayfa sayısını al"""
     try:
         pdf_file.seek(0)
         with pdfplumber.open(pdf_file) as pdf:
@@ -67,7 +48,8 @@ def get_pdf_info(pdf_file):
                 "page_count": len(pdf.pages),
                 "status": "success",
             }
-    except Exception:
+    except Exception as exc:
+        logger.error(f"PDF bilgisi alınamadı: {exc}")
         return {
             "page_count": 0,
             "status": "error",
