@@ -7,7 +7,7 @@ except ImportError:
     load_dotenv = None
 
 BASE_DIR = Path(__file__).resolve().parent
-ENV_FILE = BASE_DIR / ".env"
+ENV_FILE = BASE_DIR / "calistirma.env"
 PROMPTS_DIR = BASE_DIR / "prompts"
 
 if load_dotenv is not None:
