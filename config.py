@@ -26,19 +26,29 @@ CLASSIFY_PROMPT_FILE = str(PROMPTS_DIR / "classify.txt")
 
 # PDF settings
 MAX_PDF_SIZE_MB = 10
-ALLOWED_PDF_TYPES = ["application/pdf"]
+ALLOWED_PDF_TYPES = ["pdf"]
 
 # Streamlit settings
 STREAMLIT_PAGE_CONFIG = {
     "page_title": "Turk Hukuk Chatbotu",
-    "page_icon": "⚖️",
+    "page_icon": "T",
     "layout": "wide",
 }
 
+# Legal areas
+LEGAL_AREAS = [
+    "Genel Hukuk",
+    "Is Hukuku",
+    "Ceza Hukuku",
+    "Borclar Hukuku",
+    "Aile Hukuku",
+    "Idare Hukuku",
+]
+
 # Error messages
 ERROR_MESSAGES = {
-    "no_api_key": "❌ OpenAI API anahtari bulunamadi. .env dosyasini kontrol edin.",
-    "pdf_too_large": "❌ PDF dosyasi cok buyuk. Maksimum boyut 10 MB.",
-    "invalid_pdf": "❌ Gecerli bir PDF dosyasi yukleyin.",
-    "api_error": "❌ OpenAI API hatasi. Lutfen tekrar deneyin.",
+    "no_api_key": "OpenAI API anahtari bulunamadi. calistirma.env dosyasini kontrol edin.",
+    "pdf_too_large": "PDF dosyasi cok buyuk. Maksimum boyut 10 MB.",
+    "invalid_pdf": "Gecerli bir PDF dosyasi yukleyin.",
+    "api_error": "OpenAI API hatasi. Lutfen tekrar deneyin.",
 }

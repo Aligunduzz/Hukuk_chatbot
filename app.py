@@ -2,11 +2,11 @@ import streamlit as st
 
 try:
     from .chatbot import ask_lawyer, classify_case, summarize_legal_text
-    from .config import ALLOWED_PDF_TYPES, STREAMLIT_PAGE_CONFIG
+    from .config import ALLOWED_PDF_TYPES, STREAMLIT_PAGE_CONFIG, LEGAL_AREAS
     from .handler import extract_text_from_pdf, get_pdf_info
 except ImportError:
     from chatbot import ask_lawyer, classify_case, summarize_legal_text
-    from config import ALLOWED_PDF_TYPES, STREAMLIT_PAGE_CONFIG
+    from config import ALLOWED_PDF_TYPES, STREAMLIT_PAGE_CONFIG, LEGAL_AREAS
     from handler import extract_text_from_pdf, get_pdf_info
 
 
@@ -14,17 +14,34 @@ def _init_session_state():
     st.session_state.setdefault("chat_history", [])
     st.session_state.setdefault("pdf_text", "")
     st.session_state.setdefault("pdf_name", "")
+    st.session_state.setdefault("selected_area", "Genel Hukuk")
 
 
 def _render_sidebar():
     with st.sidebar:
         st.title("Hukuk Chatbotu")
         st.write("Turk hukuku odakli soru-cevap, ozet ve dava turu siniflandirma araci.")
-        st.caption("Calismasi icin `.env` dosyasi icinde `OPENAI_API_KEY` tanimli olmali.")
+        st.caption("Calismasi icin `calistirma.env` dosyasi icinde `OPENAI_API_KEY` tanimli olmali.")
+
+        selected_area = st.selectbox(
+            "Hukuk Alanini Secin",
+            options=LEGAL_AREAS,
+            index=LEGAL_AREAS.index(st.session_state["selected_area"])
+            if st.session_state["selected_area"] in LEGAL_AREAS
+            else 0,
+            help="Sectiginiz hukuk alani, sorularinizin baglamini belirler.",
+        )
+        st.session_state["selected_area"] = selected_area
+
+        if selected_area != "Genel Hukuk":
+            st.info(
+                f"Aktif Alan: {selected_area}\n\n"
+                "Sorulariniz bu hukuk alani baglaminda cevaplanacaktir."
+            )
 
         uploaded_pdf = st.file_uploader(
             "PDF yukle",
-            type=["pdf"],
+            type=ALLOWED_PDF_TYPES,
             accept_multiple_files=False,
         )
 
@@ -75,6 +92,7 @@ def _render_chat_tab():
                 prompt,
                 pdf_context=st.session_state["pdf_text"],
                 conversation_history=history_without_latest,
+                legal_area=st.session_state["selected_area"],
             )
             st.markdown(answer)
 

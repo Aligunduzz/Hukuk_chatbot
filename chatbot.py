@@ -116,21 +116,120 @@ def _extract_response_content(response):
         parts = []
         for item in content:
             if getattr(item, "type", None) == "text":
-                parts.append(getattr(item, "text", ""))
+                text_value = getattr(item, "text", "")
+                if isinstance(text_value, str):
+                    parts.append(text_value)
+                else:
+                    parts.append(getattr(text_value, "value", ""))
         return "\n".join(part for part in parts if part).strip()
     return (content or "").strip()
 
 
-def ask_lawyer(user_question, pdf_context="", conversation_history=None):
+def _normalize_legal_area(legal_area):
+    if not isinstance(legal_area, str):
+        return ""
+
+    translation_table = str.maketrans(
+        {
+            "I": "i",
+            "İ": "i",
+            "ı": "i",
+            "S": "s",
+            "Ş": "s",
+            "ş": "s",
+            "G": "g",
+            "Ğ": "g",
+            "ğ": "g",
+            "U": "u",
+            "Ü": "u",
+            "ü": "u",
+            "O": "o",
+            "Ö": "o",
+            "ö": "o",
+            "C": "c",
+            "Ç": "c",
+            "ç": "c",
+        }
+    )
+    return legal_area.strip().translate(translation_table).lower()
+
+
+def _get_area_specific_guidance(legal_area):
+    guidance_map = {
+        "is hukuku": (
+            "ODAKLANILAN ALAN: Is Hukuku\n"
+            "Bu alanda Is Kanunu (4857) ve sosyal guvenlik mevzuatini temel al.\n"
+            "Referans al: Isci haklari, is sozlesmesi, kidem tazminati, ihbar tazminati, "
+            "fazla mesai, ise iade, isverenin yukumlulukleri, issizlik sigortasi.\n"
+            "Pratik oneriler ver ve yasal proseduru acikla."
+        ),
+        "ceza hukuku": (
+            "ODAKLANILAN ALAN: Ceza Hukuku\n"
+            "Bu alanda Turk Ceza Kanunu (5237) ve ceza muhakemesi mevzuatini temel al.\n"
+            "Referans al: Suc turleri, ceza seviyeleri, adli islemler, mahkeme yetkisi, "
+            "savcilik rolu, savunma haklari, itiraz ve kanun yolu surecleri.\n"
+            "Hukuki proseduru ve mahkeme surecini detayli acikla."
+        ),
+        "borclar hukuku": (
+            "ODAKLANILAN ALAN: Borclar Hukuku\n"
+            "Bu alanda Turk Borclar Kanunu'nu (6098) temel al.\n"
+            "Referans al: Sozlesme, alacak-borc iliskisi, temerrut, tazminat, "
+            "cezai sart, haksiz fiil, sebepsiz zenginlesme ve iade yukumlulugu.\n"
+            "Sozlesme hukumlerini ve olasi yasal sonuclari acikla."
+        ),
+        "aile hukuku": (
+            "ODAKLANILAN ALAN: Aile Hukuku\n"
+            "Bu alanda Turk Medeni Kanunu'nun aile hukuku hukumlerini temel al.\n"
+            "Referans al: Evlilik, bosanma, mal rejimi, nafaka, velayet, "
+            "soybagi, evlat edinme ve aile kaynakli uyusmazliklar.\n"
+            "Hassas konulari dikkatli ele al ve hukuki haklari acikla."
+        ),
+        "idare hukuku": (
+            "ODAKLANILAN ALAN: Idare Hukuku\n"
+            "Bu alanda ozellikle 2577 sayili Idari Yargilama Usulu Kanunu ile ilgili idari mevzuati temel al.\n"
+            "Referans al: Idari islemler, iptal davasi, tam yargi davasi, kamulastirma, "
+            "vergi uyusmazliklari, idari basvurular ve dava acma sureleri.\n"
+            "Devlet kurumlariyla yapilacak islemleri ve basvuru yollarini acikla."
+        ),
+    }
+    return guidance_map.get(_normalize_legal_area(legal_area), "")
+
+
+def _handle_api_exception(log_message):
+    try:
+        raise
+    except AuthenticationError:
+        return "OpenAI API anahtari gecersiz."
+    except RateLimitError:
+        return "API cok fazla istek aldi. Lutfen biraz bekleyin."
+    except Exception:
+        logger.exception(log_message)
+        return config.ERROR_MESSAGES["api_error"]
+
+
+def ask_lawyer(user_question, pdf_context="", conversation_history=None, legal_area="Genel Hukuk"):
     if not config.OPENAI_API_KEY:
         return config.ERROR_MESSAGES["no_api_key"]
 
-    validation_error = _validate_user_text(user_question, "❌ Lutfen gecerli bir soru girin.")
+    validation_error = _validate_user_text(user_question, "Lutfen gecerli bir soru girin.")
     if validation_error:
         return validation_error
 
     try:
-        system_prompt = _append_pdf_context(_get_prompt(config.CHAT_PROMPT_FILE, "chat"), pdf_context)
+        system_prompt = _get_prompt(config.CHAT_PROMPT_FILE, "chat")
+
+        if _normalize_legal_area(legal_area) != "genel hukuk":
+            area_guidance = _get_area_specific_guidance(legal_area)
+            if area_guidance:
+                system_prompt = f"{system_prompt}\n\n{area_guidance}"
+            else:
+                system_prompt = (
+                    f"{system_prompt}\n\n"
+                    f"ODAKLANILAN ALAN: {legal_area}\n"
+                    "Cevaplarini bu alan cercevesinde ve Turk hukuku temelinde ver."
+                )
+
+        system_prompt = _append_pdf_context(system_prompt, pdf_context)
         messages = [{"role": "system", "content": system_prompt}]
         messages.extend(_sanitize_history(conversation_history))
         messages.append({"role": "user", "content": user_question.strip()})
@@ -141,20 +240,15 @@ def ask_lawyer(user_question, pdf_context="", conversation_history=None):
             max_tokens=config.OPENAI_MAX_TOKENS,
         )
         return _extract_response_content(response)
-    except AuthenticationError:
-        return "❌ OpenAI API anahtari gecersiz."
-    except RateLimitError:
-        return "❌ API cok fazla istek aldi. Lutfen biraz bekleyin."
     except Exception:
-        logger.exception("ask_lawyer failed")
-        return config.ERROR_MESSAGES["api_error"]
+        return _handle_api_exception("ask_lawyer failed")
 
 
 def summarize_legal_text(text):
     if not config.OPENAI_API_KEY:
         return config.ERROR_MESSAGES["no_api_key"]
 
-    validation_error = _validate_user_text(text, "❌ Ozetlenecek metni girin.")
+    validation_error = _validate_user_text(text, "Ozetlenecek metni girin.")
     if validation_error:
         return validation_error
 
@@ -169,15 +263,14 @@ def summarize_legal_text(text):
         )
         return _extract_response_content(response)
     except Exception:
-        logger.exception("summarize_legal_text failed")
-        return config.ERROR_MESSAGES["api_error"]
+        return _handle_api_exception("summarize_legal_text failed")
 
 
 def classify_case(case_text):
     if not config.OPENAI_API_KEY:
         return config.ERROR_MESSAGES["no_api_key"]
 
-    validation_error = _validate_user_text(case_text, "❌ Dava aciklamasini girin.")
+    validation_error = _validate_user_text(case_text, "Dava aciklamasini girin.")
     if validation_error:
         return validation_error
 
@@ -192,5 +285,4 @@ def classify_case(case_text):
         )
         return _extract_response_content(response)
     except Exception:
-        logger.exception("classify_case failed")
-        return config.ERROR_MESSAGES["api_error"]
+        return _handle_api_exception("classify_case failed")
