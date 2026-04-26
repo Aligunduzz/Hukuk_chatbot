@@ -23,6 +23,7 @@ OPENAI_MAX_TOKENS = int(os.getenv("OPENAI_MAX_TOKENS", "1200"))
 CHAT_PROMPT_FILE = str(PROMPTS_DIR / "chat.txt")
 SUMMARIZE_PROMPT_FILE = str(PROMPTS_DIR / "summarize.txt")
 CLASSIFY_PROMPT_FILE = str(PROMPTS_DIR / "classify.txt")
+LABOR_LAW_FILE = str(PROMPTS_DIR / "promptslabor_law.txt")
 
 # PDF settings
 MAX_PDF_SIZE_MB = 10
