@@ -101,10 +101,8 @@ def _render_chat_tab():
 
 def _render_summary_tab():
     st.subheader("Hukuki Metin Ozeti")
-    default_text = st.session_state["pdf_text"] if st.session_state["pdf_text"] else ""
     text = st.text_area(
         "Ozetlenecek metin",
-        value=default_text,
         height=280,
         placeholder="Bir dilekce, karar metni veya PDF icerigini buraya ekleyin.",
     )
