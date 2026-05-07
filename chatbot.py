@@ -353,6 +353,28 @@ def ask_lawyer(user_question, pdf_context="", conversation_history=None, legal_a
                         criminal_law_content,
                         label="CEZA KANUNU REFERANSI",
                     )
+            elif normalized_area == "borclar hukuku":
+                obligations_law_content = _select_relevant_reference_sections(
+                    user_question=user_question,
+                    reference_file=config.OBLIGATIONS_LAW_FILE,
+                )
+                if obligations_law_content:
+                    system_prompt = _append_reference_context(
+                        system_prompt,
+                        obligations_law_content,
+                        label="BORCLAR HUKUKU REFERANSI",
+                    )
+            elif normalized_area == "turk medeni kanunu":
+                medeni_law_content = _select_relevant_reference_sections(
+                    user_question=user_question,
+                    reference_file=config.MEDENI_LAW_FILE,
+                )
+                if medeni_law_content:
+                    system_prompt = _append_reference_context(
+                        system_prompt,
+                        medeni_law_content,
+                        label="TURK MEDENI KANUNU REFERANSI",
+                    )
 
         system_prompt = _append_pdf_context(system_prompt, pdf_context)
         messages = [{"role": "system", "content": system_prompt}]

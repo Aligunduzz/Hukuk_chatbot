@@ -25,6 +25,8 @@ SUMMARIZE_PROMPT_FILE = str(PROMPTS_DIR / "summarize.txt")
 CLASSIFY_PROMPT_FILE = str(PROMPTS_DIR / "classify.txt")
 LABOR_LAW_FILE = str(PROMPTS_DIR / "promptslabor_law.txt")
 CRIMINAL_LAW_FILE = str(PROMPTS_DIR / "cezakanunu.txt")
+OBLIGATIONS_LAW_FILE = str(PROMPTS_DIR / "borçlarhukuku.txt")
+MEDENI_LAW_FILE = str(PROMPTS_DIR / "TurkMedeniKanunu.txt")
 
 # PDF settings
 MAX_PDF_SIZE_MB = 10
