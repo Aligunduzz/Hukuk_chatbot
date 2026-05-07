@@ -269,8 +269,8 @@ def _get_area_specific_guidance(legal_area):
             "cezai sart, haksiz fiil, sebepsiz zenginlesme ve iade yukumlulugu.\n"
             "Sozlesme hukumlerini ve olasi yasal sonuclari acikla."
         ),
-        "aile hukuku": (
-            "ODAKLANILAN ALAN: Aile Hukuku\n"
+        "turk medeni kanunu": (
+            "ODAKLANILAN ALAN: Turk Medeni Kanunu\n"
             "Bu alanda Turk Medeni Kanunu'nun aile hukuku hukumlerini temel al.\n"
             "Referans al: Evlilik, bosanma, mal rejimi, nafaka, velayet, "
             "soybagi, evlat edinme ve aile kaynakli uyusmazliklar.\n"

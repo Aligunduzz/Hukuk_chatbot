@@ -43,7 +43,7 @@ LEGAL_AREAS = [
     "Is Hukuku",
     "Ceza Hukuku",
     "Borclar Hukuku",
-    "Aile Hukuku",
+    "Turk Medeni Kanunu",
     "Idare Hukuku",
 ]
 
