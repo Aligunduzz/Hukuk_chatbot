@@ -21,7 +21,6 @@ def _render_sidebar():
     with st.sidebar:
         st.title("Hukuk Chatbotu")
         st.write("Turk hukuku odakli soru-cevap, ozet ve dava turu siniflandirma araci.")
-        st.caption("Calismasi icin `calistirma.env` dosyasi icinde `OPENAI_API_KEY` tanimli olmali.")
 
         selected_area = st.selectbox(
             "Hukuk Alanini Secin",
