@@ -47,6 +47,8 @@ def _render_sidebar():
         if uploaded_pdf is not None:
             pdf_text = extract_text_from_pdf(uploaded_pdf)
             if pdf_text.startswith("HATA:"):
+                st.session_state["pdf_text"] = ""
+                st.session_state["pdf_name"] = ""
                 st.error(pdf_text)
             else:
                 info = get_pdf_info(uploaded_pdf)
@@ -109,7 +111,10 @@ def _render_summary_tab():
     if st.button("Ozeti Olustur", use_container_width=True):
         with st.spinner("Ozet hazirlaniyor..."):
             summary = summarize_legal_text(text)
-        st.markdown(summary)
+        if summary.startswith("OpenAI API anahtari") or summary.startswith("Ozetlenecek metni girin") or summary.startswith("OpenAI API hatasi") or summary.startswith("API cok fazla istek aldi") or summary.startswith("OpenAI API anahtari gecersiz"):
+            st.error(summary)
+        else:
+            st.markdown(summary)
 
 
 def main():
