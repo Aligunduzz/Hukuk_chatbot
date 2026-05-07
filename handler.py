@@ -1,5 +1,6 @@
-import pdfplumber
 import logging
+
+import pdfplumber
 
 logger = logging.getLogger(__name__)
 
@@ -10,7 +11,7 @@ except ImportError:
 
 
 def extract_text_from_pdf(pdf_file):
-    """PDF dosyasından metin çıkart"""
+    """PDF dosyasindan metin cikartir."""
     try:
         if hasattr(pdf_file, "size"):
             file_size_mb = pdf_file.size / (1024 * 1024)
@@ -19,7 +20,7 @@ def extract_text_from_pdf(pdf_file):
 
         pdf_file.seek(0)
         text_parts = []
-        
+
         with pdfplumber.open(pdf_file) as pdf:
             for page in pdf.pages:
                 extracted = page.extract_text()
@@ -27,20 +28,18 @@ def extract_text_from_pdf(pdf_file):
                     text_parts.append(extracted)
 
         extracted_text = "\n".join(text_parts).strip()
-        
         if not extracted_text:
-            logger.warning("PDF'den metin çıkarılamadı")
+            logger.warning("PDF'den metin cikarilamadi.")
             return "HATA: PDF'den metin cikarilamadi."
-        
+
         return extracted_text
-        
-    except Exception as exc:
-        logger.error(f"PDF işlenirken hata: {exc}")
-        return f"HATA: PDF islenirken sorun olustu - {exc}"
+    except Exception:
+        logger.exception("PDF islenirken hata olustu.")
+        return f"HATA: {ERROR_MESSAGES['pdf_processing_error']}"
 
 
 def get_pdf_info(pdf_file):
-    """PDF'nin sayfa sayısını al"""
+    """PDF'nin sayfa sayisini alir."""
     try:
         pdf_file.seek(0)
         with pdfplumber.open(pdf_file) as pdf:
@@ -48,8 +47,8 @@ def get_pdf_info(pdf_file):
                 "page_count": len(pdf.pages),
                 "status": "success",
             }
-    except Exception as exc:
-        logger.error(f"PDF bilgisi alınamadı: {exc}")
+    except Exception:
+        logger.exception("PDF bilgisi alinamadi.")
         return {
             "page_count": 0,
             "status": "error",

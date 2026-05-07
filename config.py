@@ -53,5 +53,6 @@ ERROR_MESSAGES = {
     "no_api_key": "OpenAI API anahtari bulunamadi. calistirma.env dosyasini kontrol edin.",
     "pdf_too_large": "PDF dosyasi cok buyuk. Maksimum boyut 10 MB.",
     "invalid_pdf": "Gecerli bir PDF dosyasi yukleyin.",
+    "pdf_processing_error": "PDF islenirken bir sorun olustu. Lutfen farkli bir PDF deneyin.",
     "api_error": "OpenAI API hatasi. Lutfen tekrar deneyin.",
 }
