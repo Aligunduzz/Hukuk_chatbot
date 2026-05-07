@@ -44,7 +44,6 @@ LEGAL_AREAS = [
     "Ceza Hukuku",
     "Borclar Hukuku",
     "Turk Medeni Kanunu",
-    "Idare Hukuku",
 ]
 
 # Error messages

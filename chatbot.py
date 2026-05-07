@@ -276,13 +276,6 @@ def _get_area_specific_guidance(legal_area):
             "soybagi, evlat edinme ve aile kaynakli uyusmazliklar.\n"
             "Hassas konulari dikkatli ele al ve hukuki haklari acikla."
         ),
-        "idare hukuku": (
-            "ODAKLANILAN ALAN: Idare Hukuku\n"
-            "Bu alanda ozellikle 2577 sayili Idari Yargilama Usulu Kanunu ile ilgili idari mevzuati temel al.\n"
-            "Referans al: Idari islemler, iptal davasi, tam yargi davasi, kamulastirma, "
-            "vergi uyusmazliklari, idari basvurular ve dava acma sureleri.\n"
-            "Devlet kurumlariyla yapilacak islemleri ve basvuru yollarini acikla."
-        ),
     }
     return guidance_map.get(_normalize_legal_area(legal_area), "")
 
