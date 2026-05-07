@@ -1,11 +1,11 @@
 import streamlit as st
 
 try:
-    from .chatbot import ask_lawyer, classify_case, summarize_legal_text
+    from .chatbot import ask_lawyer, summarize_legal_text
     from .config import ALLOWED_PDF_TYPES, STREAMLIT_PAGE_CONFIG, LEGAL_AREAS
     from .handler import extract_text_from_pdf, get_pdf_info
 except ImportError:
-    from chatbot import ask_lawyer, classify_case, summarize_legal_text
+    from chatbot import ask_lawyer, summarize_legal_text
     from config import ALLOWED_PDF_TYPES, STREAMLIT_PAGE_CONFIG, LEGAL_AREAS
     from handler import extract_text_from_pdf, get_pdf_info
 
@@ -113,40 +113,21 @@ def _render_summary_tab():
         st.markdown(summary)
 
 
-def _render_classify_tab():
-    st.subheader("Dava Turu Siniflandirma")
-    case_text = st.text_area(
-        "Dava aciklamasi",
-        height=220,
-        placeholder="Ornek: Isveren, kidem tazminatimi odemeden is akdimi feshetti.",
-    )
-
-    if st.button("Dava Turunu Belirle", use_container_width=True):
-        with st.spinner("Siniflandiriliyor..."):
-            result = classify_case(case_text)
-        st.markdown(result)
-
-
 def main():
     st.set_page_config(**STREAMLIT_PAGE_CONFIG)
     _init_session_state()
     _render_sidebar()
 
     st.title("Turk Hukuk Chatbotu")
-    st.caption("PDF baglamli soru-cevap, hukuki metin ozeti ve dava turu tahmini")
+    st.caption("PDF baglamli soru-cevap ve hukuki metin ozeti")
 
-    tab_chat, tab_summary, tab_classify = st.tabs(
-        ["Soru-Cevap", "Metin Ozeti", "Dava Turu"]
-    )
+    tab_chat, tab_summary = st.tabs(["Soru-Cevap", "Metin Ozeti"])
 
     with tab_chat:
         _render_chat_tab()
 
     with tab_summary:
         _render_summary_tab()
-
-    with tab_classify:
-        _render_classify_tab()
 
 
 if __name__ == "__main__":
