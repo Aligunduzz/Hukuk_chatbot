@@ -1,0 +1,10 @@
+calistirma.env
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+.git/
+.vscode/
+.idea/
+.DS_Store

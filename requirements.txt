@@ -2,7 +2,7 @@
 openai==1.30.0
 
 # PDF Processing
-pdfplumber==0.10.20
+pdfplumber
 
 # Web Interface
 streamlit==1.32.0
