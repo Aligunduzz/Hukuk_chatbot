@@ -1,4 +1,8 @@
+import logging
+
 import streamlit as st
+
+logger = logging.getLogger(__name__)
 
 try:
     from .chatbot import ask_lawyer, summarize_legal_text
@@ -49,13 +53,16 @@ def _render_sidebar():
             if pdf_text.startswith("HATA:"):
                 st.session_state["pdf_text"] = ""
                 st.session_state["pdf_name"] = ""
+                logger.warning("PDF yukleme basarisiz oldu: %s", uploaded_pdf.name)
                 st.error(pdf_text)
             else:
                 info = get_pdf_info(uploaded_pdf)
                 st.session_state["pdf_text"] = pdf_text
                 st.session_state["pdf_name"] = uploaded_pdf.name
+                logger.info("PDF yuklendi: %s", uploaded_pdf.name)
                 st.success(f"PDF hazir: {uploaded_pdf.name}")
                 if info["status"] == "success":
+                    logger.info("PDF sayfa sayisi: %s", info["page_count"])
                     st.caption(f"Sayfa sayisi: {info['page_count']}")
 
         if st.session_state["pdf_name"]:
